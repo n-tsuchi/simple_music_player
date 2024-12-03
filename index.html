@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>アイコン付き音声プレイヤー</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+      background-color: #f9f9f9;
+    }
+
+    .player-container {
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+    }
+
+    .waveform {
+      margin: 20px 0;
+    }
+
+    .time-display {
+      margin: 10px 0;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .controls button {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #007bff;
+    }
+
+    .controls button:hover {
+      color: #0056b3;
+    }
+
+    .controls button:disabled {
+      color: #bbb;
+      cursor: not-allowed;
+    }
+  </style>
+  <script src="https://unpkg.com/wavesurfer.js"></script>
+</head>
+<body>
+  <div class="player-container">
+    <h2>音声プレイヤー</h2>
+    <div id="waveform" class="waveform"></div>
+    <div class="time-display" id="time-display">00:00 / 00:00</div>
+    <div class="controls">
+      <button id="play-pause-btn" title="再生/一時停止">
+        <i class="fas fa-play"></i>
+      </button>
+      <button id="stop-btn" title="停止">
+        <i class="fas fa-stop"></i>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // WaveSurferの初期化
+    const waveformContainer = document.getElementById('waveform');
+    const wavesurfer = WaveSurfer.create({
+      container: waveformContainer,
+      waveColor: 'violet',
+      progressColor: 'purple',
+      height: 80,
+      responsive: true,
+      barWidth: 2
+    });
+
+    // 音声ファイルをロード
+    wavesurfer.load('2_23_AM.mp3');
+
+    // ボタン要素
+    const playPauseBtn = document.getElementById('play-pause-btn');
+    const stopBtn = document.getElementById('stop-btn');
+    const timeDisplay = document.getElementById('time-display');
+
+    // 再生/一時停止ボタン
+    playPauseBtn.addEventListener('click', () => {
+      wavesurfer.playPause();
+      const icon = playPauseBtn.querySelector('i');
+      icon.className = wavesurfer.isPlaying() ? 'fas fa-pause' : 'fas fa-play';
+    });
+
+    // 停止ボタン
+    stopBtn.addEventListener('click', () => {
+      wavesurfer.stop();
+      const icon = playPauseBtn.querySelector('i');
+      icon.className = 'fas fa-play';
+    });
+
+    // 再生時間/合計時間の表示
+    wavesurfer.on('audioprocess', () => {
+      const currentTime = formatTime(wavesurfer.getCurrentTime());
+      const duration = formatTime(wavesurfer.getDuration());
+      timeDisplay.textContent = `${currentTime} / ${duration}`;
+    });
+
+    wavesurfer.on('ready', () => {
+      const duration = formatTime(wavesurfer.getDuration());
+      timeDisplay.textContent = `00:00 / ${duration}`;
+    });
+
+    // 時間フォーマット関数
+    function formatTime(seconds) {
+      const minutes = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+  </script>
+</body>
+</html>
